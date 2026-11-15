@@ -25,3 +25,17 @@ in `pro_waitlist`. To give an account Pro by hand (e.g. for testing), run in the
     insert into public.entitlements (user_id, plan)
     select id, 'pro' from auth.users where email = 'you@example.com'
     on conflict (user_id) do update set plan = 'pro', updated_at = now();
+
+## Manual payments (QR code / link)
+
+Payment methods are set in `TL_CONFIG.pay` in `index.html` (QR images live in `pay/`). Run `pay.sql` once.
+When a user pays, they submit a reference and a `pending` row appears in `pro_orders`. Check the money arrived, then in the SQL Editor:
+
+    select id, email, plan, method, amount, ref, created_at from pro_orders where status = 'pending' order by created_at;
+    select approve_order(123);   -- unlocks Pro for 1 month or 1 year, extending any current Pro
+    select reject_order(123);
+
+## Languages
+
+`i18n.js` translates UI text from `lang/<code>.json` (built from `lang/src/*.json` + `lang/_keys.json` by `python3 lang/build.py`).
+To add a string: append the English to `_keys.json` and the translation to the end of every `lang/src/*.json`, then rebuild.

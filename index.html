@@ -154,6 +154,18 @@ footer{border-top:1px solid var(--line);padding-top:18px;padding-bottom:28px;fon
 .feat li{margin-bottom:4px}
 .sheet.wide{width:min(520px,100%);max-height:calc(100svh - 32px);overflow-y:auto}
 .share img{width:100%;border-radius:12px;display:block;margin-bottom:12px}
+.lsel{width:auto;min-height:40px;padding:6px 10px;background:#06311d;color:#fff;border:1px solid #2b8a5a;border-radius:10px;font-size:15px}
+.acctIn{display:contents}
+.methods{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+.qr{display:block;width:min(260px,100%);margin:6px auto 10px;border-radius:12px;background:#fff;padding:8px}
+.amt{font:800 34px "Barlow Condensed",sans-serif;text-align:center;margin:0}
+[dir=rtl] .acct{right:auto;left:0}
+[dir=rtl] th,[dir=rtl] td{text-align:left}
+[dir=rtl] th:first-child,[dir=rtl] td:first-child{text-align:right}
+[dir=rtl] .feat{padding-left:0;padding-right:20px}
+[dir=rtl] .stub{border-left-width:1px;border-right:6px solid var(--muted)}
+[dir=rtl] .stub.W{border-right-color:var(--grass)}
+[dir=rtl] .stub.L{border-right-color:var(--coral)}
 [hidden]{display:none!important}
 @media(max-width:800px){.two,.lu{grid-template-columns:minmax(0,1fr)}.board{grid-template-columns:repeat(2,minmax(0,1fr))}.cell:nth-child(2){border-right:0}.cell:nth-child(-n+2){border-bottom:1px solid #18553a}}
 @media(max-width:600px){th,td{padding:8px 5px;font-size:14px}.bar{width:60px}.li3{grid-template-columns:minmax(0,1fr) 72px 64px auto}.stub{gap:10px}.stub .fs{font-size:28px;min-width:58px}.acts{flex-direction:column}}
@@ -164,7 +176,7 @@ footer{border-top:1px solid var(--line);padding-top:18px;padding-bottom:28px;fon
 <header class="band">
 <svg class="lines" aria-hidden="true" preserveAspectRatio="xMaxYMid slice" viewBox="0 0 800 300"><g fill="none" stroke="#ffffff" stroke-opacity=".13" stroke-width="3"><line x1="560" y1="0" x2="560" y2="300"/><circle cx="560" cy="150" r="90"/><circle cx="560" cy="150" r="4" fill="#fff"/><rect x="700" y="60" width="140" height="180"/><rect x="760" y="110" width="80" height="80"/></g></svg>
 <div class="wrap">
-<div class="acct" id="acct"></div>
+<div class="acct" id="acct"><select id="lang" class="lsel" aria-label="Language"></select><span id="acctIn" class="acctIn"></span></div>
 <h1>Touchline Log</h1>
 <p class="sub">Log every FC Mobile match in seconds, track the stats you care about, and find out which cards and lineups actually win. Free, no sign-up, no ads.</p>
 <div class="board" id="board"></div>
@@ -286,11 +298,21 @@ footer{border-top:1px solid var(--line);padding-top:18px;padding-bottom:28px;fon
 <div class="modal" id="pay" hidden role="dialog" aria-modal="true" aria-labelledby="payTitle"><div class="sheet wide">
 <h3 id="payTitle">Touchline <span class="pro">PRO</span></h3>
 <p class="small" id="payWhy" style="margin:0"></p>
-<div class="plans"><button type="button" class="plan" data-plan="year" aria-pressed="true"><b>$19.99</b>per year, about $1.67 a month</button><button type="button" class="plan" data-plan="month" aria-pressed="false"><b>$2.99</b>per month</button></div>
+<div id="payA">
+<div class="plans"><button type="button" class="plan" data-plan="year" aria-pressed="true"><b id="pYear">$19.99</b><span>per year</span></button><button type="button" class="plan" data-plan="month" aria-pressed="false"><b id="pMonth">$2.99</b><span>per month</span></button></div>
 <ul class="feat"><li>Unlimited lineups and custom stat fields</li><li>Player form charts for every stat</li><li>Wins vs losses insights and opponent records</li><li>Any date range, win rate by tag</li><li>Season share cards without watermark</li><li>CSV export of every match</li><li>Screenshot scan to fill in matches, as soon as it ships</li></ul>
 <p class="small" style="margin:12px 0 0">Free stays free: logging, player stats and sync never get paywalled.</p>
+<div class="row" style="margin-top:14px"><button class="btn go" id="payGo">Notify me when Pro opens</button><button class="btn" data-close>Not now</button></div>
+</div>
+<div id="payB" hidden>
+<p class="small" style="margin:10px 0 0">Choose how to pay</p>
+<div class="methods" id="payMethods"></div>
+<p class="amt" id="payAmt" data-notr></p>
+<div id="payBox"></div>
+<p class="small">Add your account email in the payment note so we can match your payment.</p>
+<form id="payForm"><label for="payRef">Payment reference</label><input id="payRef" required maxlength="80" placeholder="Order number, or the name and time of the payment"><div class="row" style="margin-top:12px"><button class="btn go" type="submit">I have paid</button><button class="btn" type="button" id="payBack">Back</button></div></form>
+</div>
 <p class="note" id="payNote"></p>
-<div class="row"><button class="btn go" id="payGo">Notify me when Pro opens</button><button class="btn" data-close>Not now</button></div>
 </div></div>
 <div class="modal" id="shareM" hidden role="dialog" aria-modal="true" aria-labelledby="shareTitle"><div class="sheet wide share">
 <h3 id="shareTitle">Season card</h3>
@@ -299,10 +321,14 @@ footer{border-top:1px solid var(--line);padding-top:18px;padding-bottom:28px;fon
 <div class="row"><a class="btn go" id="shareDl" download="touchline-season.png" href="#">Download image</a><button class="btn" data-close>Close</button></div>
 </div></div>
 
+<script src="i18n.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js"></script>
 <script>
 /* Fill these in after creating your Supabase project (see README). The publishable/anon key is safe to ship in the page. */
-window.TL_CONFIG={url:'https://mqmqzvxnypdurjehonhr.supabase.co',key:'sb_publishable_t-45LyiSj0MG9zYQ4_Qw_w_dgKJPVrO',google:false};
+window.TL_CONFIG={url:'https://mqmqzvxnypdurjehonhr.supabase.co',key:'sb_publishable_t-45LyiSj0MG9zYQ4_Qw_w_dgKJPVrO',google:false,
+  /* Manual payments: each method shows a QR image or a link. Orders are confirmed by hand in Supabase (see README). */
+  pay:{prices:{year:{usd:'$19.99',cny:'¥129'},month:{usd:'$2.99',cny:'¥19'}},
+    methods:[{id:'alipay',name:'Alipay',qr:'pay/alipay.jpg',cur:'cny'}]}};
 </script>
 <script>
 {
@@ -407,7 +433,7 @@ function matches(){
   const ms=filtered();
   $('stubs').innerHTML=ms.length?ms.map(m=>{
     const sc=Object.entries(m.goals).map(([p,n])=>esc(pName(p))+(n>1?' ×'+n:'')).join(', ');
-    const d=new Date(m.t).toLocaleDateString(undefined,{month:'short',day:'numeric'});
+    const d=new Date(m.t).toLocaleDateString(window.TL_i18n?TL_i18n.lang():undefined,{month:'short',day:'numeric'});
     const l=luOf(m);
     const xs=mFields().filter(f=>m.xs[f.id]!=null&&m.xs[f.id]!=='').map(f=>esc(f.name)+' '+m.xs[f.id]).join(' · ');
     return`<div class="stub ${res(m)}${m.fresh?' new':''}"><div class="fs">${m.gf}–${m.ga}</div><div><div class="meta">${d} · ${esc(m.mode)}${m.opp?' · vs '+esc(m.opp):''}${l?' · '+esc(l.name):''}</div><div>${sc?'Goals: '+sc:'<span class="small">No scorers logged</span>'}</div><div class="meta">${m.mvp?`MVP <span class="mvp">${esc(pName(m.mvp))}</span>`:''}${xs?(m.mvp?' · ':'')+xs:''}</div>${m.tags.length?'<div>'+m.tags.map(t=>`<span class="tag">#${esc(t)}</span>`).join('')+'</div>':''}</div><div class="acts"><button class="ico" data-edit="${m.id}" aria-label="Edit match">Edit</button><button class="ico x" data-del="${m.id}" aria-label="Delete match">✕</button></div></div>`}).join(''):'<p class="empty">No matches for these filters. Tap New match after your next game.</p>';
@@ -428,7 +454,7 @@ function pstats(ms){
 function players(){
   const ms=filtered();
   const cols=[['p','Player'],['apps','Apps'],['g','G'],['a','A'],['ga','G+A'],['per','G+A / app'],['v','MVP'],['l','Last 5'],...pFields().map(f=>[f.id,f.name+(f.agg==='avg'?' (avg)':'')])];
-  $('phead').innerHTML='<tr>'+cols.map(([k,t])=>`<th>${k==='p'?t:`<button data-sort="${k}"${sort.k===k?' data-on':''}>${esc(t)}${sort.k===k?(sort.d<0?' ↓':' ↑'):''}</button>`}</th>`).join('')+'</tr>';
+  $('phead').innerHTML='<tr>'+cols.map(([k,t])=>`<th>${k==='p'?t:`<button data-sort="${k}"${sort.k===k?' data-on':''}>${esc(t)}${sort.k===k?(sort.d<0?'<span> ↓</span>':'<span> ↑</span>'):''}</button>`}</th>`).join('')+'</tr>';
   const rows=pstats(ms).sort((x,y)=>((y[sort.k]??-1)-(x[sort.k]??-1))*-sort.d||y.ga-x.ga);
   $('pCount').textContent=ms.length+' match'+(ms.length===1?'':'es');
   $('ptable').innerHTML=rows.length?rows.map(r=>`<tr><td><span class="pos">${esc(r.p.pos)}</span>${esc(r.p.name)}</td><td>${r.apps}</td><td>${r.g}</td><td>${r.a}</td><td><b>${r.ga}</b></td><td>${r.per}</td><td>${r.v?`<span class="mvp">${r.v}</span>`:0}</td><td>${r.l}</td>${pFields().map(f=>`<td>${r[f.id]??'–'}</td>`).join('')}</tr>`).join(''):`<tr><td colspan="${cols.length}" class="empty">Add players under Customize first.</td></tr>`;
@@ -628,7 +654,7 @@ $('sampleBtn').onclick=()=>{const prev=snap();S=sample();save();render();toast('
 $('tUndo').onclick=()=>{if(undo)undo();undo=null;$('toast').hidden=true};
 
 function acct(){
-  const el=$('acct');if(!sb){el.innerHTML='<button class="abtn gold" data-pay="header">Go Pro</button>';$('cloudDel').hidden=true;return}
+  const el=$('acctIn');if(!sb){el.innerHTML='<button class="abtn gold" data-pay="header">Go Pro</button>';$('cloudDel').hidden=true;return}
   $('cloudDel').hidden=!user;
   const lab={saving:'Saving…',ok:'Synced',error:'Offline, will retry'}[syncState]||'';
   el.innerHTML=(pro?'<span class="pro">PRO</span>':'<button class="abtn gold" data-pay="header">Go Pro</button>')+(user?`${lab?`<span class="sync">${lab}</span>`:''}<button class="abtn" id="outBtn">${esc(user.email||'Account')} · Sign out</button>`:'<button class="abtn" id="inBtn">Sign in to sync</button>');
@@ -644,7 +670,7 @@ async function onSignIn(u){
   const cloud=data?norm(data.data):null;
   S=merge(merge(cloud,cached),guest)||norm({});S.sample=false;
   try{localStorage.removeItem(KEY)}catch(e){}
-  await loadPlan();
+  await loadPlan();await loadPending();
   save();render();acct();closeAuth();
   toast(guest&&guest.matches.length?`Signed in. ${guest.matches.length} matches from this device were added to your account.`:'Signed in. Your data now syncs across devices.');
 }
@@ -687,18 +713,40 @@ async function loadPlan(){
   const{data}=await sb.from('entitlements').select('plan,expires_at').eq('user_id',user.id).maybeSingle();
   pro=!!data&&data.plan==='pro'&&(!data.expires_at||new Date(data.expires_at)>new Date());
 }
-function paywall(why){payWhy=why||'';$('payWhy').textContent=why||'Get more out of every match you log.';$('payNote').textContent='';$('pay').hidden=false}
+function paywall(why){payWhy=why||'';$('payWhy').textContent=why||'Get more out of every match you log.';syncPrices();payView(false);$('pay').hidden=false}
 document.addEventListener('click',e=>{
+  if(e.target.closest('#inBtn')&&!sb)return;
   const b=e.target.closest('[data-pay]');if(b)paywall({form:'Player form charts are part of Pro.',tags:'Win rate by tag is part of Pro.',insights:'Wins vs losses insights and opponent records are part of Pro.',share:'Pro removes the watermark from share cards.'}[b.dataset.pay]||'');
   const m=e.target.closest('.modal');if(m&&(e.target===m||e.target.closest('[data-close]')))m.hidden=true;
 });
-$('pay').addEventListener('click',e=>{const p=e.target.closest('[data-plan]');if(!p)return;plan=p.dataset.plan;document.querySelectorAll('[data-plan]').forEach(x=>x.setAttribute('aria-pressed',x===p))});
+$('pay').addEventListener('click',e=>{const p=e.target.closest('[data-plan]');if(!p)return;plan=p.dataset.plan;document.querySelectorAll('[data-plan]').forEach(x=>x.setAttribute('aria-pressed',x===p));payMethod()});
+const PAY=CFG.pay||{methods:[]};const METHODS=PAY.methods||[];let method=METHODS[0]?.id,pending=null;
+const T=(k,p)=>window.TL_i18n?TL_i18n.t(k,p):k.replace(/\{(\w+)\}/g,(x,n)=>p&&n in p?p[n]:x);
+const price=(pl,cur)=>((PAY.prices||{})[pl]||{})[cur]||'';
+function payView(b){$('payA').hidden=b;$('payB').hidden=!b;$('payNote').textContent=pending?T('Your payment for {plan} is being checked. Pro switches on once it is confirmed, usually within 24 hours.',{plan:T(pending.plan==='year'?'1 year':'1 month')}):''}
+function payMethod(){
+  const m=METHODS.find(x=>x.id===method)||METHODS[0];if(!m)return;
+  $('payMethods').innerHTML=METHODS.map(x=>`<button type="button" class="chip" data-meth="${esc(x.id)}" aria-pressed="${x.id===m.id}">${esc(x.name)}</button>`).join('');
+  $('payAmt').textContent=price(plan,m.cur||'usd');
+  $('payBox').innerHTML=m.qr?`<img class="qr" src="${esc(m.qr)}" alt="${esc(m.name)} QR code">`:m.link?`<p style="text-align:center"><a class="btn go" href="${esc(m.link)}" target="_blank" rel="noopener">${esc(T('Pay with {name}',{name:m.name}))}</a></p>`:'';
+}
+function syncPrices(){const cur=METHODS.length&&METHODS.every(m=>m.cur==='cny')?'cny':'usd';$('pYear').textContent=price('year',cur)||'$19.99';$('pMonth').textContent=price('month',cur)||'$2.99';$('payGo').textContent=METHODS.length?T('Continue to payment'):T('Notify me when Pro opens')}
+async function loadPending(){pending=null;if(!user||!sb)return;const{data}=await sb.from('pro_orders').select('plan,status,created_at').eq('user_id',user.id).eq('status','pending').order('created_at',{ascending:false}).limit(1);pending=data&&data[0]||null}
+$('pay').addEventListener('click',e=>{const mm=e.target.closest('[data-meth]');if(mm){method=mm.dataset.meth;payMethod()}});
+$('payBack').onclick=()=>payView(false);
 $('payGo').onclick=async()=>{
-  if(!sb)return $('payNote').textContent='Pro is not open yet. Check back soon.';
-  if(!user){$('pay').hidden=true;openAuth();return toast('Sign in first so we can tell you when Pro opens.')}
+  if(!sb)return $('payNote').textContent=T('Pro is not open yet. Check back soon.');
+  if(!user){$('pay').hidden=true;openAuth();return toast(T('Sign in first so your Pro unlocks on your account.'))}
+  if(METHODS.length){await loadPending();payView(true);payMethod();return}
   const{error}=await sb.from('pro_waitlist').upsert({user_id:user.id,email:user.email,plan});
-  $('payNote').textContent=error?'Could not save that. Try again in a moment.':`You're on the list for the ${plan==='year'?'yearly':'monthly'} plan. We'll email ${user.email} when Pro opens.`;
+  $('payNote').textContent=error?T('Could not save that. Try again in a moment.'):T('You are on the list. We will email {email} when Pro opens.',{email:user.email});
 };
+$('payForm').addEventListener('submit',async e=>{
+  e.preventDefault();const m=METHODS.find(x=>x.id===method)||METHODS[0];
+  const{error}=await sb.from('pro_orders').insert({user_id:user.id,email:user.email,plan,method:m.id,amount:price(plan,m.cur||'usd'),ref:$('payRef').value.trim()});
+  if(error)return $('payNote').textContent=T('Could not send that. Try again in a moment.');
+  $('payRef').value='';await loadPending();payView(true);toast(T('Thanks! We will confirm your payment soon.'));
+});
 const csvq=v=>{v=String(v??'');return/[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v};
 $('csvBtn').onclick=()=>{
   if(!pro)return paywall('CSV export is part of Pro.');
@@ -716,22 +764,22 @@ async function card(){
   const g=x.createLinearGradient(0,0,0,H);g.addColorStop(0,'#0e6a3e');g.addColorStop(1,'#06311d');x.fillStyle=g;x.fillRect(0,0,W,H);
   x.strokeStyle='rgba(255,255,255,.12)';x.lineWidth=6;x.beginPath();x.arc(W/2,H+40,330,Math.PI,0);x.stroke();x.beginPath();x.moveTo(0,H-290);x.lineTo(W,H-290);x.stroke();
   const D='"Barlow Condensed",sans-serif',T='Barlow,sans-serif';
-  x.fillStyle='#a9d6bb';x.font=`600 34px ${T}`;x.fillText('TOUCHLINE LOG · SEASON CARD',80,120);
-  const sc=[F.mode!=='All'?F.mode:'',F.tag!=='All'?'#'+F.tag:'',F.range!=='all'?$('fl-range').selectedOptions[0].text:''].filter(Boolean).join(' · ')||'All matches';
+  x.fillStyle='#a9d6bb';x.font=`600 34px ${T}`;x.fillText('TOUCHLINE LOG · '+T('Season card').toUpperCase(),80,120);
+  const sc=[F.mode!=='All'?F.mode:'',F.tag!=='All'?'#'+F.tag:'',F.range!=='all'?$('fl-range').selectedOptions[0].text:''].filter(Boolean).join(' · ')||T('All matches');
   x.fillStyle='#fff';x.font=`800 64px ${D}`;x.fillText(sc,80,200);
   x.font=`800 230px ${D}`;x.fillText(`${c.W}-${c.D}-${c.L}`,72,440);
-  x.fillStyle='#a9d6bb';x.font=`500 34px ${T}`;x.fillText(`Wins, draws and losses over ${n} match${n===1?'':'es'}`,80,500);
+  x.fillStyle='#a9d6bb';x.font=`500 34px ${T}`;x.fillText(T(n===1?'Wins, draws and losses over {n} match':'Wins, draws and losses over {n} matches',{n}),80,500);
   const box=(bx,by,k,v)=>{x.fillStyle='rgba(0,0,0,.22)';x.beginPath();if(x.roundRect)x.roundRect(bx,by,440,190,24);else x.rect(bx,by,440,190);x.fill();x.fillStyle='#a9d6bb';x.font=`500 32px ${T}`;x.fillText(k,bx+32,by+58);x.fillStyle='#fff';x.font=`800 90px ${D}`;x.fillText(v,bx+30,by+156)};
-  box(80,560,'Win rate',pct(c.W,n)+'%');box(560,560,'Goals for / against',`${gf} / ${ga}`);
-  x.fillStyle='#a9d6bb';x.font=`500 32px ${T}`;x.fillText('Top scorer',80,830);x.fillText('Most MVPs',560,830);
+  box(80,560,T('Win rate'),pct(c.W,n)+'%');box(560,560,T('Goals for / against'),`${gf} / ${ga}`);
+  x.fillStyle='#a9d6bb';x.font=`500 32px ${T}`;x.fillText(T('Top scorer'),80,830);x.fillText(T('Most MVPs'),560,830);
   x.fillStyle='#fff';x.font=`800 64px ${D}`;
   x.fillText(st[0]&&st[0].g?`${st[0].p.name}  ${st[0].g}`:'–',80,900);
   x.fillStyle='#ffd23f';x.fillText(mv[0]&&mv[0].v?`${mv[0].p.name}  ${mv[0].v}`:'–',560,900);
-  x.fillStyle='#a9d6bb';x.font=`500 32px ${T}`;x.fillText('Last 10',80,990);
+  x.fillStyle='#a9d6bb';x.font=`500 32px ${T}`;x.fillText(T('Last 10'),80,990);
   ms.slice(0,10).reverse().forEach((m,i)=>{const r=res(m),cx=104+i*92,cy=1050;x.beginPath();x.arc(cx,cy,30,0,7);if(r==='W'){x.fillStyle='#fff';x.fill()}else if(r==='L'){x.fillStyle='#ff5a4e';x.fill()}else{x.strokeStyle='#fff';x.lineWidth=5;x.stroke()}x.fillStyle=r==='W'?'#06311d':'#fff';x.font=`800 34px ${D}`;x.textAlign='center';x.fillText(r,cx,cy+12);x.textAlign='left'});
   x.fillStyle='rgba(255,255,255,.75)';x.font=`500 30px ${T}`;
   if(pro)x.fillText('Touchline Log',80,H-70);
-  else{x.fillStyle='rgba(0,0,0,.35)';x.fillRect(0,H-150,W,150);x.fillStyle='#fff';x.font=`700 40px ${T}`;x.fillText('Made with Touchline Log',80,H-82);x.fillStyle='#a9d6bb';x.font=`500 30px ${T}`;x.fillText('Free FC Mobile match tracker · wdq11111.github.io/touchline-log',80,H-40)}
+  else{x.fillStyle='rgba(0,0,0,.35)';x.fillRect(0,H-150,W,150);x.fillStyle='#fff';x.font=`700 40px ${T}`;x.fillText(T('Made with Touchline Log'),80,H-82);x.fillStyle='#a9d6bb';x.font=`500 30px ${T}`;x.fillText(T('Free FC Mobile match tracker')+' · wdq11111.github.io/touchline-log',80,H-40)}
   return cv.toDataURL('image/png');
 }
 $('shareBtn').onclick=async()=>{
@@ -739,6 +787,7 @@ $('shareBtn').onclick=async()=>{
   $('shareHint').innerHTML=pro?'On a phone you can also press and hold the image to save it.':'On a phone you can also press and hold the image to save it. <button class="btn sm" data-pay="share" style="margin-left:4px">Remove watermark with Pro</button>';
   $('shareM').hidden=false;
 };
+window.addEventListener('tl-lang',()=>{render();acct();if(!$('pay').hidden){syncPrices();payMethod()}});
 acct();
 render();
 }
