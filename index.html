@@ -139,6 +139,21 @@ footer{border-top:1px solid var(--line);padding-top:18px;padding-bottom:28px;fon
 .gbtn{width:100%;margin-bottom:12px}
 .or{text-align:center;font-size:14px;color:var(--muted);margin:4px 0 12px}
 @media(max-width:600px){.acct{position:static;max-width:none;justify-content:flex-start;margin-bottom:12px}}
+.locked{position:relative}
+.locked>:not(.lock){filter:blur(6px);opacity:.55;pointer-events:none;user-select:none}
+.lock{position:absolute;inset:0;display:grid;place-items:center;z-index:2;padding:12px}
+.lock>div{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;text-align:center;max-width:300px;box-shadow:0 10px 30px rgba(0,0,0,.18)}
+.lock p{margin:8px 0 12px;font-size:15px}
+.pro{display:inline-block;background:var(--gold);color:#3a2c00;font:700 13px "Barlow Condensed",sans-serif;border-radius:6px;padding:1px 7px;vertical-align:middle}
+.abtn.gold{background:var(--gold);color:#3a2c00;border-color:var(--gold)}
+.plans{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:14px 0}
+.plan{border:2px solid var(--line);border-radius:12px;padding:12px;cursor:pointer;background:var(--bg);text-align:left;font-size:14px;color:var(--muted)}
+.plan[aria-pressed=true]{border-color:var(--grass)}
+.plan b{font:700 28px/1.1 "Barlow Condensed",sans-serif;display:block;color:var(--ink)}
+.feat{margin:6px 0 0;padding-left:20px}
+.feat li{margin-bottom:4px}
+.sheet.wide{width:min(520px,100%);max-height:calc(100svh - 32px);overflow-y:auto}
+.share img{width:100%;border-radius:12px;display:block;margin-bottom:12px}
 [hidden]{display:none!important}
 @media(max-width:800px){.two,.lu{grid-template-columns:minmax(0,1fr)}.board{grid-template-columns:repeat(2,minmax(0,1fr))}.cell:nth-child(2){border-right:0}.cell:nth-child(-n+2){border-bottom:1px solid #18553a}}
 @media(max-width:600px){th,td{padding:8px 5px;font-size:14px}.bar{width:60px}.li3{grid-template-columns:minmax(0,1fr) 72px 64px auto}.stub{gap:10px}.stub .fs{font-size:28px;min-width:58px}.acts{flex-direction:column}}
@@ -175,7 +190,7 @@ footer{border-top:1px solid var(--line);padding-top:18px;padding-bottom:28px;fon
 <main class="band"><div class="wrap">
 
 <section id="matches">
-<div class="head"><h2>Matches</h2><div class="row"><button class="btn" id="ownBtn" hidden>Clear sample, start my own log</button><button class="btn go" id="newBtn">+ New match</button></div></div>
+<div class="head"><h2>Matches</h2><div class="row"><button class="btn" id="ownBtn" hidden>Clear sample, start my own log</button><button class="btn" id="shareBtn">Share season card</button><button class="btn go" id="newBtn">+ New match</button></div></div>
 <form class="panel" id="form" hidden>
 <h3 id="f-title">New match</h3>
 <div class="grid">
@@ -216,14 +231,14 @@ footer{border-top:1px solid var(--line);padding-top:18px;padding-bottom:28px;fon
 <div class="panel"><h3 id="trendTitle">Win rate, rolling 5 matches</h3><div class="fig"><svg id="trend" role="img" aria-label="Rolling win rate chart"></svg></div></div>
 <div class="panel"><h3 id="goalsTitle">Goals scored and conceded</h3><div class="fig"><svg id="goals" role="img" aria-label="Goals per match chart"></svg></div></div>
 </div>
-<div class="panel">
+<div class="panel" id="fpPanel" data-pro><div class="lock" hidden><div><span class="pro">PRO</span><p>See how each card performs match by match, for any stat you track.</p><button class="btn go sm" data-pay="form">See Pro</button></div></div>
 <div class="head" style="margin-bottom:8px"><h3 style="margin:0">Player form</h3><div class="row"><select id="fp-player" aria-label="Player" style="width:auto"></select><select id="fp-metric" aria-label="Metric" style="width:auto"></select></div></div>
 <p class="small" id="fpNote" style="margin:0 0 6px"></p>
 <div class="fig"><svg id="form-chart" role="img" aria-label="Player form chart"></svg></div>
 </div>
 <div class="two">
-<div class="panel"><h3>Win rate by mode</h3><div id="byMode"></div><h3 style="margin-top:18px">Win rate by tag</h3><div id="byTag"></div></div>
-<div class="panel"><h3>Match stats in wins vs losses</h3><div id="wl"></div><h3 style="margin-top:18px">Opponents</h3><div class="scroll"><table><thead><tr><th>Opponent</th><th>Played</th><th>W-D-L</th><th>Goals</th></tr></thead><tbody id="opp"></tbody></table></div></div>
+<div class="panel"><h3>Win rate by mode</h3><div id="byMode"></div><div id="tagWrap" data-pro style="margin-top:18px;min-height:150px"><div class="lock" hidden><div><span class="pro">PRO</span><p>Break down your win rate by tag.</p><button class="btn go sm" data-pay="tags">See Pro</button></div></div><h3>Win rate by tag</h3><div id="byTag"></div></div></div>
+<div class="panel" id="wlPanel" data-pro><div class="lock" hidden><div><span class="pro">PRO</span><p>Compare your stats in wins and losses, and your record against each opponent.</p><button class="btn go sm" data-pay="insights">See Pro</button></div></div><h3>Match stats in wins vs losses</h3><div id="wl"></div><h3 style="margin-top:18px">Opponents</h3><div class="scroll"><table><thead><tr><th>Opponent</th><th>Played</th><th>W-D-L</th><th>Goals</th></tr></thead><tbody id="opp"></tbody></table></div></div>
 </div>
 </section>
 
@@ -245,7 +260,7 @@ footer{border-top:1px solid var(--line);padding-top:18px;padding-bottom:28px;fon
 </div>
 <div class="panel"><h3>Backup</h3>
 <p class="small" style="margin-top:0">Signed out, your data lives only in this browser. Sign in to sync it to your account, or copy a backup and paste it here to restore.</p>
-<div class="row" style="margin-bottom:12px"><button class="btn" id="copyBtn">Copy backup</button><button class="btn" id="importBtn">Restore from pasted backup</button><button class="btn" id="sampleBtn">Load sample data</button><button class="btn warn" id="clearBtn">Clear all data</button><button class="btn warn" id="cloudDel" hidden>Delete my cloud data</button></div>
+<div class="row" style="margin-bottom:12px"><button class="btn" id="copyBtn">Copy backup</button><button class="btn" id="csvBtn">Export CSV <span class="pro">PRO</span></button><button class="btn" id="importBtn">Restore from pasted backup</button><button class="btn" id="sampleBtn">Load sample data</button><button class="btn warn" id="clearBtn">Clear all data</button><button class="btn warn" id="cloudDel" hidden>Delete my cloud data</button></div>
 <textarea id="io" aria-label="Backup data" placeholder="Paste a backup here to restore"></textarea>
 <p class="note" id="ioNote"></p>
 </div>
@@ -266,6 +281,22 @@ footer{border-top:1px solid var(--line);padding-top:18px;padding-bottom:28px;fon
 <form id="codeForm"><label for="au-code">Sign-in code</label><input id="au-code" inputmode="numeric" autocomplete="one-time-code" required maxlength="10"><div class="row" style="margin-top:14px"><button class="btn go" type="submit">Sign in</button><button class="btn" type="button" id="backBtn">Use another email</button></div></form>
 </div>
 <p class="note" id="authNote"></p>
+</div></div>
+
+<div class="modal" id="pay" hidden role="dialog" aria-modal="true" aria-labelledby="payTitle"><div class="sheet wide">
+<h3 id="payTitle">Touchline <span class="pro">PRO</span></h3>
+<p class="small" id="payWhy" style="margin:0"></p>
+<div class="plans"><button type="button" class="plan" data-plan="year" aria-pressed="true"><b>$19.99</b>per year, about $1.67 a month</button><button type="button" class="plan" data-plan="month" aria-pressed="false"><b>$2.99</b>per month</button></div>
+<ul class="feat"><li>Unlimited lineups and custom stat fields</li><li>Player form charts for every stat</li><li>Wins vs losses insights and opponent records</li><li>Any date range, win rate by tag</li><li>Season share cards without watermark</li><li>CSV export of every match</li><li>Screenshot scan to fill in matches, as soon as it ships</li></ul>
+<p class="small" style="margin:12px 0 0">Free stays free: logging, player stats and sync never get paywalled.</p>
+<p class="note" id="payNote"></p>
+<div class="row"><button class="btn go" id="payGo">Notify me when Pro opens</button><button class="btn" data-close>Not now</button></div>
+</div></div>
+<div class="modal" id="shareM" hidden role="dialog" aria-modal="true" aria-labelledby="shareTitle"><div class="sheet wide share">
+<h3 id="shareTitle">Season card</h3>
+<img id="shareImg" alt="Season card image">
+<p class="small" id="shareHint" style="margin:0 0 12px"></p>
+<div class="row"><a class="btn go" id="shareDl" download="touchline-season.png" href="#">Download image</a><button class="btn" data-close>Close</button></div>
 </div></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js"></script>
@@ -315,7 +346,8 @@ function norm(d){
 }
 const CFG=window.TL_CONFIG||{};
 const sb=CFG.url&&CFG.key&&window.supabase?window.supabase.createClient(CFG.url,CFG.key):null;
-let user=null,syncState='',pushT=0;
+let user=null,syncState='',pushT=0,pro=false,payWhy='',plan='year';
+const FREE={lineups:2,fields:2};
 const curKey=()=>user?KEY+':'+user.id:KEY;
 function load(k){try{const r=localStorage.getItem(k||KEY);if(r)return norm(JSON.parse(r));if(!k||k===KEY){const o=localStorage.getItem(OLD);if(o){const d=norm(JSON.parse(o));d.sample=false;return d}}}catch(e){}return null}
 const payload=()=>{const d=JSON.parse(JSON.stringify({squad:S.squad,lineups:S.lineups,fields:S.fields,modes:S.modes,tags:S.tags,matches:S.matches}));d.matches.forEach(m=>delete m.fresh);return d};
@@ -504,7 +536,8 @@ function openForm(m){
   $('form').hidden=false;form();$('form').scrollIntoView({block:'start',behavior:'smooth'});
 }
 
-function render(){filters();board();matches();players();lineups();if(tab==='analysis')analysis();custom()}
+function locks(){document.querySelectorAll('[data-pro]').forEach(el=>{el.classList.toggle('locked',!pro);el.querySelector('.lock').hidden=pro})}
+function render(){locks();filters();board();matches();players();lineups();if(tab==='analysis')analysis();custom()}
 function showTab(t){tab=t;['matches','players','lineups','analysis','custom'].forEach(x=>{$(x).hidden=x!==t;$('t-'+x).setAttribute('aria-selected',x===t)});filters();if(t==='analysis')analysis()}
 function toast(msg,fn){$('tMsg').textContent=msg;$('tUndo').hidden=!fn;undo=fn;$('toast').hidden=false;clearTimeout(tTimer);tTimer=setTimeout(()=>{$('toast').hidden=true;undo=null},6000)}
 function commit(msg,prev){S.sample=false;save();render();if(msg)toast(msg,prev?()=>{S=prev;save();render()}:null)}
@@ -513,7 +546,7 @@ const snap=()=>JSON.parse(JSON.stringify(S));
 document.querySelector('nav').addEventListener('click',e=>{const b=e.target.closest('[data-tab]');if(b)showTab(b.dataset.tab)});
 $('fl-mode').onchange=e=>{F.mode=e.target.value;render()};
 $('fl-tag').onchange=e=>{F.tag=e.target.value;render()};
-$('fl-range').onchange=e=>{F.range=e.target.value;render()};
+$('fl-range').onchange=e=>{const v=e.target.value;if(!pro&&(v==='custom'||v==='90')){e.target.value=F.range;return paywall('Longer and custom date ranges are part of Pro.')}F.range=v;render()};
 $('fl-from').onchange=e=>{F.from=e.target.value;render()};
 $('fl-to').onchange=e=>{F.to=e.target.value;render()};
 $('fl-reset').onclick=()=>{Object.assign(F,{mode:'All',tag:'All',range:'all',from:'',to:''});$('fl-range').value='all';render()};
@@ -551,7 +584,7 @@ $('stubs').addEventListener('click',e=>{
 });
 $('phead').addEventListener('click',e=>{const b=e.target.closest('[data-sort]');if(!b)return;const k=b.dataset.sort;sort=sort.k===k?{k,d:-sort.d}:{k,d:-1};players()});
 
-$('newLu').onclick=()=>{const prev=snap();S.lineups.push({id:uid(),name:'Lineup '+(S.lineups.length+1),formation:'4-3-3',players:[]});commit('Lineup added',prev)};
+$('newLu').onclick=()=>{if(!pro&&S.lineups.length>=FREE.lineups)return paywall(`Free accounts can keep ${FREE.lineups} lineups. Pro removes the limit.`);const prev=snap();S.lineups.push({id:uid(),name:'Lineup '+(S.lineups.length+1),formation:'4-3-3',players:[]});commit('Lineup added',prev)};
 $('luList').addEventListener('click',e=>{
   const card=e.target.closest('[data-lu]');if(!card)return;const l=S.lineups.find(x=>x.id===card.dataset.lu);
   const pk=e.target.closest('[data-pick]'),rm=e.target.closest('[data-rmlu]');
@@ -561,7 +594,7 @@ $('luList').addEventListener('click',e=>{
 $('luList').addEventListener('change',e=>{const card=e.target.closest('[data-lu]'),f=e.target.dataset.lf;if(!card||!f)return;const l=S.lineups.find(x=>x.id===card.dataset.lu);l[f]=e.target.value.trim()||l[f];commit()});
 $('fp-player').onchange=formChart;$('fp-metric').onchange=formChart;
 
-$('addField').addEventListener('submit',e=>{e.preventDefault();const n=$('af-name').value.trim();if(!n)return;const prev=snap();S.fields.push({id:'f'+uid(),name:n,scope:$('af-scope').value,agg:$('af-agg').value});$('af-name').value='';commit(`Added ${n}`,prev)});
+$('addField').addEventListener('submit',e=>{e.preventDefault();const n=$('af-name').value.trim();if(!n)return;if(!pro&&S.fields.length>=FREE.fields)return paywall(`Free accounts can track ${FREE.fields} custom stat fields. Pro removes the limit.`);const prev=snap();S.fields.push({id:'f'+uid(),name:n,scope:$('af-scope').value,agg:$('af-agg').value});$('af-name').value='';commit(`Added ${n}`,prev)});
 $('addMode').addEventListener('submit',e=>{e.preventDefault();const n=$('am-name').value.trim();if(!n||S.modes.includes(n))return;S.modes.push(n);$('am-name').value='';commit()});
 $('addTag').addEventListener('submit',e=>{e.preventDefault();const n=$('at-name').value.trim().replace(/^#/,'');if(!n||S.tags.includes(n))return;S.tags.push(n);$('at-name').value='';commit()});
 $('custom').addEventListener('change',e=>{
@@ -595,10 +628,10 @@ $('sampleBtn').onclick=()=>{const prev=snap();S=sample();save();render();toast('
 $('tUndo').onclick=()=>{if(undo)undo();undo=null;$('toast').hidden=true};
 
 function acct(){
-  const el=$('acct');if(!sb){el.innerHTML='';$('cloudDel').hidden=true;return}
+  const el=$('acct');if(!sb){el.innerHTML='<button class="abtn gold" data-pay="header">Go Pro</button>';$('cloudDel').hidden=true;return}
   $('cloudDel').hidden=!user;
   const lab={saving:'Saving…',ok:'Synced',error:'Offline, will retry'}[syncState]||'';
-  el.innerHTML=user?`${lab?`<span class="sync">${lab}</span>`:''}<button class="abtn" id="outBtn">${esc(user.email||'Account')} · Sign out</button>`:'<button class="abtn" id="inBtn">Sign in to sync</button>';
+  el.innerHTML=(pro?'<span class="pro">PRO</span>':'<button class="abtn gold" data-pay="header">Go Pro</button>')+(user?`${lab?`<span class="sync">${lab}</span>`:''}<button class="abtn" id="outBtn">${esc(user.email||'Account')} · Sign out</button>`:'<button class="abtn" id="inBtn">Sign in to sync</button>');
 }
 function authStep(n){$('step1').hidden=n!==1;$('step2').hidden=n!==2;$('authNote').textContent=''}
 function openAuth(){$('auth').hidden=false;authStep(1);$('gBtn').hidden=$('gOr').hidden=!CFG.google;$('au-email').focus()}
@@ -611,10 +644,11 @@ async function onSignIn(u){
   const cloud=data?norm(data.data):null;
   S=merge(merge(cloud,cached),guest)||norm({});S.sample=false;
   try{localStorage.removeItem(KEY)}catch(e){}
+  await loadPlan();
   save();render();acct();closeAuth();
   toast(guest&&guest.matches.length?`Signed in. ${guest.matches.length} matches from this device were added to your account.`:'Signed in. Your data now syncs across devices.');
 }
-function onSignOut(){user=null;syncState='';clearTimeout(pushT);S=load(KEY)||sample();render();acct()}
+function onSignOut(){user=null;pro=false;syncState='';clearTimeout(pushT);S=load(KEY)||sample();render();acct()}
 if(sb){
   sb.auth.onAuthStateChange((ev,session)=>{
     const u=session?session.user:null;
@@ -648,6 +682,63 @@ if(sb){
     await sb.auth.signOut();toast('Your cloud data was deleted and you are signed out.');
   };
 }
+async function loadPlan(){
+  if(!user)return pro=false;
+  const{data}=await sb.from('entitlements').select('plan,expires_at').eq('user_id',user.id).maybeSingle();
+  pro=!!data&&data.plan==='pro'&&(!data.expires_at||new Date(data.expires_at)>new Date());
+}
+function paywall(why){payWhy=why||'';$('payWhy').textContent=why||'Get more out of every match you log.';$('payNote').textContent='';$('pay').hidden=false}
+document.addEventListener('click',e=>{
+  const b=e.target.closest('[data-pay]');if(b)paywall({form:'Player form charts are part of Pro.',tags:'Win rate by tag is part of Pro.',insights:'Wins vs losses insights and opponent records are part of Pro.',share:'Pro removes the watermark from share cards.'}[b.dataset.pay]||'');
+  const m=e.target.closest('.modal');if(m&&(e.target===m||e.target.closest('[data-close]')))m.hidden=true;
+});
+$('pay').addEventListener('click',e=>{const p=e.target.closest('[data-plan]');if(!p)return;plan=p.dataset.plan;document.querySelectorAll('[data-plan]').forEach(x=>x.setAttribute('aria-pressed',x===p))});
+$('payGo').onclick=async()=>{
+  if(!sb)return $('payNote').textContent='Pro is not open yet. Check back soon.';
+  if(!user){$('pay').hidden=true;openAuth();return toast('Sign in first so we can tell you when Pro opens.')}
+  const{error}=await sb.from('pro_waitlist').upsert({user_id:user.id,email:user.email,plan});
+  $('payNote').textContent=error?'Could not save that. Try again in a moment.':`You're on the list for the ${plan==='year'?'yearly':'monthly'} plan. We'll email ${user.email} when Pro opens.`;
+};
+const csvq=v=>{v=String(v??'');return/[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v};
+$('csvBtn').onclick=()=>{
+  if(!pro)return paywall('CSV export is part of Pro.');
+  const mf=mFields(),pf=pFields();
+  const head=['date','mode','opponent','scored','conceded','result','lineup','mvp','scorers','assists','tags',...mf.map(f=>f.name),...pf.map(f=>f.name+' (by player)')];
+  const rows=[...S.matches].sort((a,b)=>a.t-b.t).map(m=>[new Date(m.t).toISOString().slice(0,10),m.mode,m.opp,m.gf,m.ga,res(m),luOf(m)?.name||'',m.mvp?pName(m.mvp):'',Object.entries(m.goals).map(([p,n])=>pName(p)+(n>1?' x'+n:'')).join('; '),Object.entries(m.assists).map(([p,n])=>pName(p)+(n>1?' x'+n:'')).join('; '),m.tags.join('; '),...mf.map(f=>m.xs[f.id]??''),...pf.map(f=>Object.entries(m.ps[f.id]||{}).map(([p,v])=>pName(p)+' '+v).join('; '))]);
+  const url=URL.createObjectURL(new Blob([[head,...rows].map(r=>r.map(csvq).join(',')).join('\n')],{type:'text/csv'}));
+  const a=document.createElement('a');a.href=url;a.download='touchline-matches.csv';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),2000);
+};
+async function card(){
+  const ms=filtered(),c=wdl(ms),n=ms.length,gf=sum(ms.map(m=>m.gf)),ga=sum(ms.map(m=>m.ga));
+  const st=pstats(ms).sort((a,b)=>b.g-a.g),mv=pstats(ms).sort((a,b)=>b.v-a.v);
+  try{await document.fonts.load('800 80px "Barlow Condensed"');await document.fonts.load('500 30px Barlow')}catch(e){}
+  const W=1080,H=1350,cv=document.createElement('canvas');cv.width=W;cv.height=H;const x=cv.getContext('2d');
+  const g=x.createLinearGradient(0,0,0,H);g.addColorStop(0,'#0e6a3e');g.addColorStop(1,'#06311d');x.fillStyle=g;x.fillRect(0,0,W,H);
+  x.strokeStyle='rgba(255,255,255,.12)';x.lineWidth=6;x.beginPath();x.arc(W/2,H+40,330,Math.PI,0);x.stroke();x.beginPath();x.moveTo(0,H-290);x.lineTo(W,H-290);x.stroke();
+  const D='"Barlow Condensed",sans-serif',T='Barlow,sans-serif';
+  x.fillStyle='#a9d6bb';x.font=`600 34px ${T}`;x.fillText('TOUCHLINE LOG · SEASON CARD',80,120);
+  const sc=[F.mode!=='All'?F.mode:'',F.tag!=='All'?'#'+F.tag:'',F.range!=='all'?$('fl-range').selectedOptions[0].text:''].filter(Boolean).join(' · ')||'All matches';
+  x.fillStyle='#fff';x.font=`800 64px ${D}`;x.fillText(sc,80,200);
+  x.font=`800 230px ${D}`;x.fillText(`${c.W}-${c.D}-${c.L}`,72,440);
+  x.fillStyle='#a9d6bb';x.font=`500 34px ${T}`;x.fillText(`Wins, draws and losses over ${n} match${n===1?'':'es'}`,80,500);
+  const box=(bx,by,k,v)=>{x.fillStyle='rgba(0,0,0,.22)';x.beginPath();if(x.roundRect)x.roundRect(bx,by,440,190,24);else x.rect(bx,by,440,190);x.fill();x.fillStyle='#a9d6bb';x.font=`500 32px ${T}`;x.fillText(k,bx+32,by+58);x.fillStyle='#fff';x.font=`800 90px ${D}`;x.fillText(v,bx+30,by+156)};
+  box(80,560,'Win rate',pct(c.W,n)+'%');box(560,560,'Goals for / against',`${gf} / ${ga}`);
+  x.fillStyle='#a9d6bb';x.font=`500 32px ${T}`;x.fillText('Top scorer',80,830);x.fillText('Most MVPs',560,830);
+  x.fillStyle='#fff';x.font=`800 64px ${D}`;
+  x.fillText(st[0]&&st[0].g?`${st[0].p.name}  ${st[0].g}`:'–',80,900);
+  x.fillStyle='#ffd23f';x.fillText(mv[0]&&mv[0].v?`${mv[0].p.name}  ${mv[0].v}`:'–',560,900);
+  x.fillStyle='#a9d6bb';x.font=`500 32px ${T}`;x.fillText('Last 10',80,990);
+  ms.slice(0,10).reverse().forEach((m,i)=>{const r=res(m),cx=104+i*92,cy=1050;x.beginPath();x.arc(cx,cy,30,0,7);if(r==='W'){x.fillStyle='#fff';x.fill()}else if(r==='L'){x.fillStyle='#ff5a4e';x.fill()}else{x.strokeStyle='#fff';x.lineWidth=5;x.stroke()}x.fillStyle=r==='W'?'#06311d':'#fff';x.font=`800 34px ${D}`;x.textAlign='center';x.fillText(r,cx,cy+12);x.textAlign='left'});
+  x.fillStyle='rgba(255,255,255,.75)';x.font=`500 30px ${T}`;
+  if(pro)x.fillText('Touchline Log',80,H-70);
+  else{x.fillStyle='rgba(0,0,0,.35)';x.fillRect(0,H-150,W,150);x.fillStyle='#fff';x.font=`700 40px ${T}`;x.fillText('Made with Touchline Log',80,H-82);x.fillStyle='#a9d6bb';x.font=`500 30px ${T}`;x.fillText('Free FC Mobile match tracker · wdq11111.github.io/touchline-log',80,H-40)}
+  return cv.toDataURL('image/png');
+}
+$('shareBtn').onclick=async()=>{
+  const url=await card();$('shareImg').src=url;$('shareDl').href=url;
+  $('shareHint').innerHTML=pro?'On a phone you can also press and hold the image to save it.':'On a phone you can also press and hold the image to save it. <button class="btn sm" data-pay="share" style="margin-left:4px">Remove watermark with Pro</button>';
+  $('shareM').hidden=false;
+};
 acct();
 render();
 }

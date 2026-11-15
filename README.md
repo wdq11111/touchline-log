@@ -15,3 +15,13 @@ Signed out, everything works locally in the browser; signing in merges this devi
 7. Optional Google sign-in: enable the Google provider in Supabase with a Google Cloud OAuth client, then set `google:true` in `TL_CONFIG`.
 
 Unofficial fan tool, not affiliated with or endorsed by Electronic Arts.
+
+## Pro
+
+Run `pro.sql` once. Free accounts keep 2 lineups and 2 custom stat fields; Pro unlocks the rest, advanced analysis,
+longer date ranges, watermark-free share cards and CSV export. Until payments are connected, "Go Pro" collects a waitlist
+in `pro_waitlist`. To give an account Pro by hand (e.g. for testing), run in the SQL Editor:
+
+    insert into public.entitlements (user_id, plan)
+    select id, 'pro' from auth.users where email = 'you@example.com'
+    on conflict (user_id) do update set plan = 'pro', updated_at = now();
