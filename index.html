@@ -166,6 +166,20 @@ footer{border-top:1px solid var(--line);padding-top:18px;padding-bottom:28px;fon
 [dir=rtl] .stub{border-left-width:1px;border-right:6px solid var(--muted)}
 [dir=rtl] .stub.W{border-right-color:var(--grass)}
 [dir=rtl] .stub.L{border-right-color:var(--coral)}
+.post{display:grid;grid-template-columns:64px minmax(0,1fr);gap:14px;border:1px solid var(--line);background:var(--card);border-radius:12px;padding:12px 14px;cursor:pointer;text-align:left;width:100%;font:inherit;color:inherit}
+.post:hover{background:var(--soft)}
+.ccard{width:64px;height:84px;border-radius:10px 10px 20px 20px;background:linear-gradient(160deg,#ffe58a,#c99a2e);color:#3a2c00;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:"Barlow Condensed",sans-serif;box-shadow:inset 0 0 0 2px rgba(255,255,255,.45)}
+.ccard b{font-size:30px;line-height:1}
+.ccard span{font-size:15px;font-weight:700}
+.post h4,.thr h3{margin:0 0 2px;font-size:18px;line-height:1.25;overflow-wrap:anywhere}
+.cname{font-weight:600;font-size:15px;overflow-wrap:anywhere}
+.excerpt{color:var(--muted);font-size:15px;margin:4px 0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
+.pmeta{font-size:13px;color:var(--muted);display:flex;gap:12px;flex-wrap:wrap}
+.pbody{white-space:pre-wrap;overflow-wrap:anywhere;margin:12px 0}
+.likeb[aria-pressed=true]{color:var(--coral);border-color:var(--coral)}
+.cmt{border-top:1px solid var(--line);padding:10px 0}
+.cmt p{margin:4px 0 0;white-space:pre-wrap;overflow-wrap:anywhere}
+.txt{font:16px/1.5 Barlow,system-ui,sans-serif;min-height:110px}
 [hidden]{display:none!important}
 @media(max-width:800px){.two,.lu{grid-template-columns:minmax(0,1fr)}.board{grid-template-columns:repeat(2,minmax(0,1fr))}.cell:nth-child(2){border-right:0}.cell:nth-child(-n+2){border-bottom:1px solid #18553a}}
 @media(max-width:600px){th,td{padding:8px 5px;font-size:14px}.bar{width:60px}.li3{grid-template-columns:minmax(0,1fr) 72px 64px auto}.stub{gap:10px}.stub .fs{font-size:28px;min-width:58px}.acts{flex-direction:column}}
@@ -188,6 +202,7 @@ footer{border-top:1px solid var(--line);padding-top:18px;padding-bottom:28px;fon
 <button role="tab" id="t-players" data-tab="players" aria-selected="false">Players</button>
 <button role="tab" id="t-lineups" data-tab="lineups" aria-selected="false">Lineups</button>
 <button role="tab" id="t-analysis" data-tab="analysis" aria-selected="false">Analysis</button>
+<button role="tab" id="t-forum" data-tab="forum" aria-selected="false">Community</button>
 <button role="tab" id="t-custom" data-tab="custom" aria-selected="false">Customize</button>
 </nav>
 <div class="filters" id="filters">
@@ -254,6 +269,28 @@ footer{border-top:1px solid var(--line);padding-top:18px;padding-bottom:28px;fon
 </div>
 </section>
 
+<section id="forum" hidden>
+<div class="head"><h2>Card talk</h2><button class="btn go" id="newPost">+ New post</button></div>
+<div class="row" style="margin-bottom:14px"><input id="fq" type="search" placeholder="Search a card, e.g. Mbappé" aria-label="Search cards" style="max-width:280px"><select id="fpos" aria-label="Position" style="width:auto"></select><select id="fsort" aria-label="Sort" style="width:auto"><option value="new">Newest</option><option value="top">Most liked</option></select><button class="btn sm" id="fRefresh">Refresh</button></div>
+<form class="panel" id="postForm" hidden>
+<h3>New post</h3>
+<div class="grid">
+<div><label for="pf-name">Card name</label><input id="pf-name" maxlength="40" required placeholder="e.g. Mbappé"></div>
+<div><label for="pf-ovr">OVR</label><input id="pf-ovr" inputmode="numeric" maxlength="3"></div>
+<div><label for="pf-pos">Position</label><select id="pf-pos"></select></div>
+<div><label for="pf-ver">Version or event</label><input id="pf-ver" maxlength="30" placeholder="e.g. TOTY"></div>
+<div><label for="pf-rate">Your rating</label><select id="pf-rate"></select></div>
+</div>
+<label for="pf-title">Title</label><input id="pf-title" maxlength="80" required>
+<label for="pf-body" style="margin-top:12px">What do you think of this card?</label><textarea id="pf-body" class="txt" maxlength="2000" required></textarea>
+<p class="note" id="pfNote"></p>
+<div class="row"><button class="btn go" type="submit">Post</button><button class="btn" type="button" id="pfCancel">Cancel</button></div>
+</form>
+<div class="stubs" id="fList"></div>
+<div class="panel thr" id="fThread" hidden></div>
+<p class="small">Be kind. Posts are public, and reported posts may be removed.</p>
+</section>
+
 <section id="custom" hidden>
 <div class="two">
 <div class="panel"><h3>Stat fields</h3><p class="small" style="margin-top:0">Add anything you want to track. Per player fields appear next to each player when logging; per match fields appear once per match.</p>
@@ -299,7 +336,7 @@ footer{border-top:1px solid var(--line);padding-top:18px;padding-bottom:28px;fon
 <h3 id="payTitle">Touchline <span class="pro">PRO</span></h3>
 <p class="small" id="payWhy" style="margin:0"></p>
 <div id="payA">
-<div class="plans"><button type="button" class="plan" data-plan="year" aria-pressed="true"><b id="pYear">$19.99</b><span>per year</span></button><button type="button" class="plan" data-plan="month" aria-pressed="false"><b id="pMonth">$2.99</b><span>per month</span></button></div>
+<div class="plans"><button type="button" class="plan" data-plan="year" aria-pressed="true"><b id="pYear">$9.99</b><span>per year</span></button><button type="button" class="plan" data-plan="month" aria-pressed="false"><b id="pMonth">$1.49</b><span>per month</span></button></div>
 <ul class="feat"><li>Unlimited lineups and custom stat fields</li><li>Player form charts for every stat</li><li>Wins vs losses insights and opponent records</li><li>Any date range, win rate by tag</li><li>Season share cards without watermark</li><li>CSV export of every match</li><li>Screenshot scan to fill in matches, as soon as it ships</li></ul>
 <p class="small" style="margin:12px 0 0">Free stays free: logging, player stats and sync never get paywalled.</p>
 <div class="row" style="margin-top:14px"><button class="btn go" id="payGo">Notify me when Pro opens</button><button class="btn" data-close>Not now</button></div>
@@ -314,6 +351,11 @@ footer{border-top:1px solid var(--line);padding-top:18px;padding-bottom:28px;fon
 </div>
 <p class="note" id="payNote"></p>
 </div></div>
+<div class="modal" id="nickM" hidden role="dialog" aria-modal="true" aria-labelledby="nickTitle"><div class="sheet">
+<h3 id="nickTitle">Choose a nickname</h3>
+<p class="small">Other players see this name next to your posts.</p>
+<form id="nickForm"><label for="nk">Nickname</label><input id="nk" maxlength="20" required><p class="note" id="nkNote"></p><div class="row"><button class="btn go" type="submit">Save</button><button class="btn" type="button" data-close>Cancel</button></div></form>
+</div></div>
 <div class="modal" id="shareM" hidden role="dialog" aria-modal="true" aria-labelledby="shareTitle"><div class="sheet wide share">
 <h3 id="shareTitle">Season card</h3>
 <img id="shareImg" alt="Season card image">
@@ -327,7 +369,7 @@ footer{border-top:1px solid var(--line);padding-top:18px;padding-bottom:28px;fon
 /* Fill these in after creating your Supabase project (see README). The publishable/anon key is safe to ship in the page. */
 window.TL_CONFIG={url:'https://mqmqzvxnypdurjehonhr.supabase.co',key:'sb_publishable_t-45LyiSj0MG9zYQ4_Qw_w_dgKJPVrO',google:false,
   /* Manual payments: each method shows a QR image or a link. Orders are confirmed by hand in Supabase (see README). */
-  pay:{prices:{year:{usd:'$19.99',cny:'¥129'},month:{usd:'$2.99',cny:'¥19'}},
+  pay:{prices:{year:{usd:'$9.99',cny:'¥59'},month:{usd:'$1.49',cny:'¥9'}},
     methods:[{id:'alipay',name:'Alipay',qr:'pay/alipay.jpg',cur:'cny'}]}};
 </script>
 <script>
@@ -426,7 +468,7 @@ function filters(){
   $('fl-tag').innerHTML=o('All','All tags',F.tag)+allTags().map(x=>o(x,'#'+x,F.tag)).join('');
   $('fl-dates').hidden=F.range!=='custom';
   $('fl-reset').hidden=F.mode==='All'&&F.tag==='All'&&F.range==='all';
-  $('filters').hidden=tab==='custom';
+  $('filters').hidden=tab==='custom'||tab==='forum';
 }
 
 function matches(){
@@ -564,7 +606,7 @@ function openForm(m){
 
 function locks(){document.querySelectorAll('[data-pro]').forEach(el=>{el.classList.toggle('locked',!pro);el.querySelector('.lock').hidden=pro})}
 function render(){locks();filters();board();matches();players();lineups();if(tab==='analysis')analysis();custom()}
-function showTab(t){tab=t;['matches','players','lineups','analysis','custom'].forEach(x=>{$(x).hidden=x!==t;$('t-'+x).setAttribute('aria-selected',x===t)});filters();if(t==='analysis')analysis()}
+function showTab(t){tab=t;['matches','players','lineups','analysis','forum','custom'].forEach(x=>{$(x).hidden=x!==t;$('t-'+x).setAttribute('aria-selected',x===t)});filters();if(t==='analysis')analysis();if(t==='forum'&&!FT.loaded)forumLoad()}
 function toast(msg,fn){$('tMsg').textContent=msg;$('tUndo').hidden=!fn;undo=fn;$('toast').hidden=false;clearTimeout(tTimer);tTimer=setTimeout(()=>{$('toast').hidden=true;undo=null},6000)}
 function commit(msg,prev){S.sample=false;save();render();if(msg)toast(msg,prev?()=>{S=prev;save();render()}:null)}
 const snap=()=>JSON.parse(JSON.stringify(S));
@@ -670,11 +712,11 @@ async function onSignIn(u){
   const cloud=data?norm(data.data):null;
   S=merge(merge(cloud,cached),guest)||norm({});S.sample=false;
   try{localStorage.removeItem(KEY)}catch(e){}
-  await loadPlan();await loadPending();
+  await loadPlan();await loadPending();await loadNick();if(FT.loaded)forumLoad();
   save();render();acct();closeAuth();
   toast(guest&&guest.matches.length?`Signed in. ${guest.matches.length} matches from this device were added to your account.`:'Signed in. Your data now syncs across devices.');
 }
-function onSignOut(){user=null;pro=false;syncState='';clearTimeout(pushT);S=load(KEY)||sample();render();acct()}
+function onSignOut(){user=null;pro=false;myNick=null;syncState='';clearTimeout(pushT);S=load(KEY)||sample();render();acct()}
 if(sb){
   sb.auth.onAuthStateChange((ev,session)=>{
     const u=session?session.user:null;
@@ -730,7 +772,7 @@ function payMethod(){
   $('payAmt').textContent=price(plan,m.cur||'usd');
   $('payBox').innerHTML=m.qr?`<img class="qr" src="${esc(m.qr)}" alt="${esc(m.name)} QR code">`:m.link?`<p style="text-align:center"><a class="btn go" href="${esc(m.link)}" target="_blank" rel="noopener">${esc(T('Pay with {name}',{name:m.name}))}</a></p>`:'';
 }
-function syncPrices(){const cur=METHODS.length&&METHODS.every(m=>m.cur==='cny')?'cny':'usd';$('pYear').textContent=price('year',cur)||'$19.99';$('pMonth').textContent=price('month',cur)||'$2.99';$('payGo').textContent=METHODS.length?T('Continue to payment'):T('Notify me when Pro opens')}
+function syncPrices(){const cur=METHODS.length&&METHODS.every(m=>m.cur==='cny')?'cny':'usd';$('pYear').textContent=price('year',cur)||'$9.99';$('pMonth').textContent=price('month',cur)||'$1.49';$('payGo').textContent=METHODS.length?T('Continue to payment'):T('Notify me when Pro opens')}
 async function loadPending(){pending=null;if(!user||!sb)return;const{data}=await sb.from('pro_orders').select('plan,status,created_at').eq('user_id',user.id).eq('status','pending').order('created_at',{ascending:false}).limit(1);pending=data&&data[0]||null}
 $('pay').addEventListener('click',e=>{const mm=e.target.closest('[data-meth]');if(mm){method=mm.dataset.meth;payMethod()}});
 $('payBack').onclick=()=>payView(false);
@@ -787,6 +829,101 @@ $('shareBtn').onclick=async()=>{
   $('shareHint').innerHTML=pro?'On a phone you can also press and hold the image to save it.':'On a phone you can also press and hold the image to save it. <button class="btn sm" data-pay="share" style="margin-left:4px">Remove watermark with Pro</button>';
   $('shareM').hidden=false;
 };
+/* ---- Card talk ---- */
+let myNick=null,nickThen=null;const FT={list:[],liked:new Set(),open:null,loaded:false,armed:null};
+async function loadNick(){myNick=null;if(!user||!sb)return;const{data}=await sb.from('profiles').select('nickname').eq('id',user.id).maybeSingle();myNick=data?.nickname||null}
+const lng=()=>window.TL_i18n?TL_i18n.lang():'en';
+function ago(ts){const s=(new Date(ts)-Date.now())/1000,rt=new Intl.RelativeTimeFormat(lng(),{numeric:'auto'});for(const[u,n]of[['year',31536000],['month',2592000],['day',86400],['hour',3600],['minute',60]])if(Math.abs(s)>=n)return rt.format(Math.round(s/n),u);return rt.format(0,'second')}
+const cnt=(n,one,many)=>T(n===1?one:many,{n});
+function needAccount(then){
+  if(!sb)return false;
+  if(!user){openAuth();toast(T('Sign in to post and comment.'));return false}
+  if(!myNick){nickThen=then;$('nk').value='';$('nkNote').textContent='';$('nickM').hidden=false;$('nk').focus();return false}
+  return true;
+}
+$('nickForm').addEventListener('submit',async e=>{
+  e.preventDefault();const v=$('nk').value.trim();
+  if(v.length<2||v.length>20||/[<>]/.test(v))return $('nkNote').textContent=T('Nicknames are 2 to 20 characters.');
+  const{error}=await sb.from('profiles').upsert({id:user.id,nickname:v});
+  if(error)return $('nkNote').textContent=error.code==='23505'?T('That nickname is taken. Try another.'):T('Could not save that. Try again in a moment.');
+  myNick=v;$('nickM').hidden=true;if(nickThen){const f=nickThen;nickThen=null;f()}
+});
+async function forumLoad(){
+  FT.loaded=true;
+  if(!sb){$('fList').innerHTML=`<p class="empty">${esc(T('The community needs an internet connection.'))}</p>`;return}
+  let q=sb.from('forum_threads').select('id,card_name,card_ovr,card_pos,card_version,title,body,rating,created_at,user_id,profiles(nickname),forum_likes(count),forum_comments(count)').order('created_at',{ascending:false}).limit(100);
+  const term=$('fq').value.trim().replace(/[%_,()*]/g,'');if(term)q=q.ilike('card_name',`%${term}%`);
+  if($('fpos').value)q=q.eq('card_pos',$('fpos').value);
+  const{data,error}=await q;
+  if(error){$('fList').innerHTML=`<p class="empty">${esc(T('Could not load posts. Check your connection and refresh.'))}</p>`;return}
+  FT.list=data.map(t=>({...t,likes:t.forum_likes?.[0]?.count||0,comments:t.forum_comments?.[0]?.count||0,nick:t.profiles?.nickname||'?'}));
+  FT.liked=new Set();
+  if(user&&FT.list.length){const{data:l}=await sb.from('forum_likes').select('thread_id').eq('user_id',user.id).in('thread_id',FT.list.map(t=>t.id));FT.liked=new Set((l||[]).map(x=>x.thread_id))}
+  forumRender();if(FT.open)forumOpen(FT.open,true);
+}
+const chip=t=>`<div class="ccard" aria-hidden="true"><b>${t.card_ovr??'–'}</b><span>${esc(t.card_pos||'')}</span></div>`;
+function forumRender(){
+  const L=[...FT.list];if($('fsort').value==='top')L.sort((a,b)=>b.likes-a.likes||b.comments-a.comments);
+  $('fList').hidden=!!FT.open;$('fThread').hidden=!FT.open;
+  $('fList').innerHTML=L.length?L.map(t=>`<button type="button" class="post" data-thread="${t.id}">${chip(t)}<div><div class="cname" data-notr>${esc(t.card_name)}${t.card_version?' · '+esc(t.card_version):''}</div><h4 data-notr>${esc(t.title)}</h4><p class="excerpt" data-notr>${esc(t.body)}</p><div class="pmeta"><span data-notr>${esc(t.nick)}</span><span>${esc(ago(t.created_at))}</span><span>${esc(cnt(t.likes,'{n} like','{n} likes'))}</span><span>${esc(cnt(t.comments,'{n} comment','{n} comments'))}</span>${t.rating?`<span>${esc(T('Rating {n}/10',{n:t.rating}))}</span>`:''}</div></div></button>`).join(''):`<p class="empty">${esc(T('No posts yet. Start the first discussion!'))}</p>`;
+}
+async function forumOpen(id,quiet){
+  const t=FT.list.find(x=>x.id===id);if(!t)return;FT.open=id;$('fList').hidden=true;$('fThread').hidden=false;
+  const{data:cs}=await sb.from('forum_comments').select('id,body,created_at,user_id,profiles(nickname)').eq('thread_id',id).order('created_at');
+  const mine=user&&t.user_id===user.id,liked=FT.liked.has(id);
+  $('fThread').innerHTML=`<button class="btn sm" id="fBack">← ${esc(T('Back to posts'))}</button>
+  <div style="display:grid;grid-template-columns:64px minmax(0,1fr);gap:14px;margin-top:14px">${chip(t)}<div><div class="cname" data-notr>${esc(t.card_name)}${t.card_version?' · '+esc(t.card_version):''}</div><h3 data-notr>${esc(t.title)}</h3><div class="pmeta"><span data-notr>${esc(t.nick)}</span><span>${esc(ago(t.created_at))}</span>${t.rating?`<span>${esc(T('Rating {n}/10',{n:t.rating}))}</span>`:''}</div></div></div>
+  <div class="pbody" data-notr>${esc(t.body)}</div>
+  <div class="row"><button class="btn sm likeb" id="fLike" aria-pressed="${liked}">${esc(T(liked?'Liked':'Like'))} · ${t.likes}</button>${mine?`<button class="btn sm warn" id="fDel">${esc(T('Delete'))}</button>`:`<button class="btn sm" data-report="t${t.id}">${esc(T('Report'))}</button>`}</div>
+  <h3 style="margin-top:20px">${esc(T('Comments'))}</h3>
+  <div id="fCmts">${(cs||[]).map(c=>`<div class="cmt"><div class="pmeta"><b data-notr>${esc(c.profiles?.nickname||'?')}</b><span>${esc(ago(c.created_at))}</span>${user&&c.user_id===user.id?`<button class="ico x" data-delc="${c.id}" aria-label="${esc(T('Delete'))}">✕</button>`:`<button class="ico" data-report="c${c.id}" aria-label="${esc(T('Report'))}">!</button>`}</div><p data-notr>${esc(c.body)}</p></div>`).join('')||`<p class="small">${esc(T('No comments yet.'))}</p>`}</div>
+  <form id="cForm" style="margin-top:12px"><label for="cBody">${esc(T('Write a comment'))}</label><textarea id="cBody" class="txt" maxlength="1000" required style="min-height:80px"></textarea><div class="row" style="margin-top:10px"><button class="btn go" type="submit">${esc(T('Send'))}</button></div></form>`;
+  if(!quiet)$('fThread').scrollIntoView({block:'start',behavior:'smooth'});
+}
+const postErr=e=>/rate_limit/.test(e?.message||'')?T('You are posting too fast. Try again in a bit.'):T('Could not post that. Try again.');
+$('fList').addEventListener('click',e=>{const b=e.target.closest('[data-thread]');if(b)forumOpen(+b.dataset.thread)});
+$('fThread').addEventListener('click',async e=>{
+  const t=FT.list.find(x=>x.id===FT.open);
+  if(e.target.closest('#fBack')){FT.open=null;forumRender();return}
+  if(e.target.closest('#fLike')){if(!needAccount(()=>{}))return;const on=!FT.liked.has(t.id);
+    const{error}=on?await sb.from('forum_likes').insert({thread_id:t.id,user_id:user.id}):await sb.from('forum_likes').delete().eq('thread_id',t.id).eq('user_id',user.id);
+    if(!error){on?FT.liked.add(t.id):FT.liked.delete(t.id);t.likes+=on?1:-1;forumOpen(t.id,true)}return}
+  if(e.target.closest('#fDel')){if(FT.armed!=='t'+t.id){FT.armed='t'+t.id;e.target.textContent=T('Tap again to delete');return}
+    const{error}=await sb.from('forum_threads').delete().eq('id',t.id);if(error)return toast(T('Could not delete. Try again.'));FT.open=null;toast(T('Post deleted'));forumLoad();return}
+  const dc=e.target.closest('[data-delc]');if(dc){if(FT.armed!=='c'+dc.dataset.delc){FT.armed='c'+dc.dataset.delc;toast(T('Tap again to delete'));return}
+    await sb.from('forum_comments').delete().eq('id',+dc.dataset.delc);t.comments=Math.max(0,t.comments-1);forumOpen(t.id,true);return}
+  const rp=e.target.closest('[data-report]');if(rp){if(!needAccount(()=>{}))return;const k=rp.dataset.report,id=+k.slice(1);
+    const{error}=await sb.from('forum_reports').insert(k[0]==='t'?{thread_id:id,user_id:user.id}:{comment_id:id,user_id:user.id});toast(error?postErr(error):T('Thanks, we will take a look.'))}
+});
+$('fThread').addEventListener('submit',async e=>{
+  if(e.target.id!=='cForm')return;e.preventDefault();
+  const body=$('cBody').value.trim();if(!body)return;
+  if(!needAccount(()=>$('cForm').requestSubmit()))return;
+  const t=FT.list.find(x=>x.id===FT.open);
+  const{error}=await sb.from('forum_comments').insert({thread_id:t.id,user_id:user.id,body});
+  if(error)return toast(postErr(error));
+  t.comments++;toast(T('Comment added'));forumOpen(t.id,true);
+});
+$('newPost').onclick=()=>{if(!needAccount(()=>$('newPost').click()))return;$('postForm').hidden=false;$('pfNote').textContent='';$('pf-name').focus()};
+$('pfCancel').onclick=()=>$('postForm').hidden=true;
+$('postForm').addEventListener('submit',async e=>{
+  e.preventDefault();if(!needAccount(()=>$('postForm').requestSubmit()))return;
+  const row={user_id:user.id,card_name:$('pf-name').value.trim(),card_ovr:parseInt($('pf-ovr').value,10)||null,card_pos:$('pf-pos').value||null,card_version:$('pf-ver').value.trim()||null,rating:+$('pf-rate').value||null,title:$('pf-title').value.trim(),body:$('pf-body').value.trim()};
+  if(!row.card_name||row.title.length<3||!row.body)return $('pfNote').textContent=T('Fill in the card name, a title and your thoughts.');
+  const{error}=await sb.from('forum_threads').insert(row);
+  if(error)return $('pfNote').textContent=postErr(error);
+  ['pf-name','pf-ovr','pf-ver','pf-title','pf-body'].forEach(i=>$(i).value='');$('postForm').hidden=true;toast(T('Posted!'));FT.open=null;forumLoad();
+});
+function forumSelects(){
+  const cur=$('fpos').value;$('fpos').innerHTML=`<option value="">${esc(T('All positions'))}</option>`+POS.map(p=>`<option${p===cur?' selected':''}>${p}</option>`).join('');
+  $('pf-pos').innerHTML='<option value=""></option>'+POS.map(p=>`<option>${p}</option>`).join('');
+  $('pf-rate').innerHTML='<option value="">–</option>'+Array.from({length:10},(_,i)=>`<option value="${10-i}">${10-i}</option>`).join('');
+}
+forumSelects();
+let fqT=0;$('fq').addEventListener('input',()=>{clearTimeout(fqT);fqT=setTimeout(forumLoad,350)});
+$('fpos').onchange=forumLoad;$('fsort').onchange=forumRender;$('fRefresh').onclick=forumLoad;
+
+window.addEventListener('tl-lang',()=>{forumSelects();if(FT.loaded){forumRender();if(FT.open)forumOpen(FT.open,true)}});
 window.addEventListener('tl-lang',()=>{render();acct();if(!$('pay').hidden){syncPrices();payMethod()}});
 acct();
 render();

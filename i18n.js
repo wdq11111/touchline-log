@@ -29,7 +29,7 @@
     if(root.nodeType!==1||SKIP[root.nodeName])return;
     if(root.closest&&root.closest('[data-notr]'))return;
     doAttrs(root);
-    const w=document.createTreeWalker(root,NodeFilter.SHOW_ELEMENT|NodeFilter.SHOW_TEXT,{acceptNode:n=>n.nodeType===1?(SKIP[n.nodeName]||n.hasAttribute('data-notr')?NodeFilter.FILTER_REJECT:NodeFilter.FILTER_ACCEPT):(SKIP[n.parentNode.nodeName]?NodeFilter.FILTER_REJECT:NodeFilter.FILTER_ACCEPT)});
+    const w=document.createTreeWalker(root,NodeFilter.SHOW_ELEMENT|NodeFilter.SHOW_TEXT,{acceptNode:n=>n.nodeType===1?(n.hasAttribute('data-notr')?NodeFilter.FILTER_REJECT:SKIP[n.nodeName]?(n.nodeName==='TEXTAREA'&&doAttrs(n),NodeFilter.FILTER_REJECT):NodeFilter.FILTER_ACCEPT):(SKIP[n.parentNode.nodeName]?NodeFilter.FILTER_REJECT:NodeFilter.FILTER_ACCEPT)});
     let n;while((n=w.nextNode())){if(n.nodeType===3)doText(n);else doAttrs(n)}
   }
   function reset(root){

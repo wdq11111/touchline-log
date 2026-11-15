@@ -39,3 +39,15 @@ When a user pays, they submit a reference and a `pending` row appears in `pro_or
 
 `i18n.js` translates UI text from `lang/<code>.json` (built from `lang/src/*.json` + `lang/_keys.json` by `python3 lang/build.py`).
 To add a string: append the English to `_keys.json` and the translation to the end of every `lang/src/*.json`, then rebuild.
+
+## Card talk (community)
+
+Run `forum.sql` once. Moderation from the SQL Editor:
+
+    -- reported posts and comments, most reported first
+    select coalesce(r.thread_id, c.thread_id) as thread, r.comment_id, count(*) as reports,
+           max(t.title) as title, max(c.body) as comment
+    from forum_reports r left join forum_threads t on t.id = r.thread_id left join forum_comments c on c.id = r.comment_id
+    group by 1, 2 order by reports desc;
+    delete from forum_threads where id = 123;    -- removes a post and its comments
+    delete from forum_comments where id = 456;
