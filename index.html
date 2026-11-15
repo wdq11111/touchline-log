@@ -861,7 +861,7 @@ async function forumLoad(){
   if(user&&FT.list.length){const{data:l}=await sb.from('forum_likes').select('thread_id').eq('user_id',user.id).in('thread_id',FT.list.map(t=>t.id));FT.liked=new Set((l||[]).map(x=>x.thread_id))}
   forumRender();if(FT.open)forumOpen(FT.open,true);
 }
-const chip=t=>`<div class="ccard" aria-hidden="true"><b>${t.card_ovr??'–'}</b><span>${esc(t.card_pos||'')}</span></div>`;
+const chip=t=>`<div class="ccard" aria-hidden="true"><b>${t.card_ovr??esc((t.card_name||'?').trim().charAt(0).toUpperCase())}</b><span>${esc(t.card_pos||'')}</span></div>`;
 function forumRender(){
   const L=[...FT.list];if($('fsort').value==='top')L.sort((a,b)=>b.likes-a.likes||b.comments-a.comments);
   $('fList').hidden=!!FT.open;$('fThread').hidden=!FT.open;
